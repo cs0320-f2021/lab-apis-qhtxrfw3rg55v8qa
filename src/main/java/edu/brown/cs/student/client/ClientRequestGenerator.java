@@ -4,7 +4,9 @@ import edu.brown.cs.student.client.ClientAuth;
 
 import java.net.URI;
 import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.net.http.HttpClient;
 
 /**
  * This class generates the HttpRequests that are then used to make requests from the ApiClient.
@@ -19,10 +21,13 @@ public class ClientRequestGenerator {
   public static HttpRequest getIntroGetRequest() {
     // The resource we want is hosted at https://cq2gahtw4j.execute-api.us-east-1.amazonaws.com/.
     String reqUri = "https://epb3u4xo11.execute-api.us-east-1.amazonaws.com/Prod/introResource";
-    // TODO build and return a new GET HttpRequest.
+    HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(reqUri))
+            .build();
+    System.out.println(request);
+    return request;
     // See https://docs.oracle.com/en/java/javase/11/docs/api/java.net.http/java/net/http/HttpRequest.html and
     // https://docs.oracle.com/en/java/javase/11/docs/api/java.net.http/java/net/http/HttpRequest.Builder.html
-    return null;
   }
 
   /**
@@ -33,11 +38,14 @@ public class ClientRequestGenerator {
    */
   public static HttpRequest getSecuredGetRequest() {
     String reqUri = "https://epb3u4xo11.execute-api.us-east-1.amazonaws.com/Prod/securedResource";
-    // TODO get the secret API key by using the ClientAuth class.
-    String apiKey = null;
-    // TODO build and return a new GET HttpRequest with an api key header.
-    // Hint: .header("x-api-key", apiKey)
-    return null;
+    ClientAuth clientAuth = new ClientAuth();
+    String apiKey = clientAuth.getApiKey();
+    HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(reqUri))
+            .header("x-api-key", apiKey)
+            .build();
+    System.out.println(request);
+    return request;
   }
 
   /**
@@ -48,10 +56,18 @@ public class ClientRequestGenerator {
    */
   public static HttpRequest getSecuredPostRequest(String param) {
     String reqUri = "https://epb3u4xo11.execute-api.us-east-1.amazonaws.com/Prod/securedResource";
-    String apiKey = null;
+    String apiKey = new ClientAuth().getApiKey();
     // TODO build and return a new POST HttpRequest with an api key header, and the param in the body.
     // Hint: the POST param should be: HttpRequest.BodyPublishers.ofString("{\"name\":\"" + param + "\"}")
-    return null;
+
+    HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(reqUri))
+            .header("x-api-key", apiKey)
+            .POST(HttpRequest.BodyPublishers.ofString("{\"name\":\"" + param + "\"}"))
+            .build();
+
+    System.out.println(request);
+    return request;
   }
 
   /**
@@ -66,14 +82,28 @@ public class ClientRequestGenerator {
     // Our taName parameter can either be empty, or some name, in which case it takes the format "?taName=name".
     // If you tried this in the web browser URL you might see something like
     // https://epb3u4xo11.execute-api.us-east-1.amazonaws.com/Prod/securedResource?taName=theInputName
-    String taName = null;
-    // TODO set the taName. It should either be empty "" if the param is empty, or else of the format "?taName=param"
-    String reqUri =
-        "https://epb3u4xo11.execute-api.us-east-1.amazonaws.com/Prod/horoscopeResource/" + taName;
-    // TODO get the secret API key by using the ClientAuth class.
-    String apiKey = null;
-    System.out.println("Getting star sign for " + param);
-    // TODO build and return a new GET request with the api key header.
-    return null;
+    ClientAuth clientAuth = new ClientAuth();
+    String apiKey = clientAuth.getApiKey();
+    String taName;
+    if (param.isEmpty()) {
+      taName = "";
+      String reqUri = "https://epb3u4xo11.execute-api.us-east-1.amazonaws.com/Prod/horoscopeResource/";
+      HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(reqUri))
+              .header("x-api-key", apiKey)
+              .build();
+      System.out.println(request);
+      return request;
+    } else {
+      taName = "?taName=" + param;
+      String reqUri = "https://epb3u4xo11.execute-api.us-east-1.amazonaws.com/Prod/horoscopeResource/" + taName;
+      HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(reqUri))
+              .header("x-api-key", apiKey)
+              .build();
+      System.out.println(request);
+      System.out.println("Getting star sign for " + param);
+      return request;
+    }
   }
 }
